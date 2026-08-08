@@ -1,22 +1,25 @@
 const {
     getAllRecords,
-    addRecord
+    getRecordById,
+    addRecord,
+    updateRecord,
+    deleteRecord
 } = require("../../Infrastructure/repositories/recordRepository");
 
 const {
-    findCategoryById
+    getCategoryById
 } = require("../../Infrastructure/repositories/categoryRepository");
 
 const {
-    findStatusById
+    getStatusById
 } = require("../../Infrastructure/repositories/statusRepository");
 
 const {
-    findOwnerById
+    getOwnerById
 } = require("../../Infrastructure/repositories/ownerRepository");
 
 const {
-    findPriorityById
+    getPriorityById
 } = require("../../Infrastructure/repositories/priorityRepository");
 
 const {
@@ -25,10 +28,10 @@ const {
 
 function getAllRecordDtos() {
     return getAllRecords().map(record => {
-        const category = findCategoryById(record.categoryId);
-        const status = findStatusById(record.statusId);
-        const owner = findOwnerById(record.ownerId);
-        const priority = findPriorityById(record.priorityId);
+        const category = getCategoryById(record.categoryId);
+        const status = getStatusById(record.statusId);
+        const owner = getOwnerById(record.ownerId);
+        const priority = getPriorityById(record.priorityId);
 
         return mapRecordToDto(
             record,
@@ -40,27 +43,71 @@ function getAllRecordDtos() {
     });
 }
 
-function createRecord(data) {
-    if (!findCategoryById(data.categoryId)) {
+function getRecordDtoById(id) {
+    const record = getRecordById(id);
+
+    if (!record) {
+        return null;
+    }
+
+    const category = getCategoryById(record.categoryId);
+    const status = getStatusById(record.statusId);
+    const owner = getOwnerById(record.ownerId);
+    const priority = getPriorityById(record.priorityId);
+
+    return mapRecordToDto(
+        record,
+        category,
+        status,
+        owner,
+        priority
+    );
+}
+
+function validateRelations(data) {
+    if (!getCategoryById(data.categoryId)) {
         throw new Error("Category not found.");
     }
 
-    if (!findStatusById(data.statusId)) {
+    if (!getStatusById(data.statusId)) {
         throw new Error("Status not found.");
     }
 
-    if (!findOwnerById(data.ownerId)) {
+    if (!getOwnerById(data.ownerId)) {
         throw new Error("Owner not found.");
     }
 
-    if (!findPriorityById(data.priorityId)) {
+    if (!getPriorityById(data.priorityId)) {
         throw new Error("Priority not found.");
     }
+}
+
+function createRecord(data) {
+    validateRelations(data);
 
     return addRecord(data);
 }
 
+function editRecord(id, data) {
+    const existingRecord = getRecordById(id);
+
+    if (!existingRecord) {
+        return null;
+    }
+
+    validateRelations(data);
+
+    return updateRecord(id, data);
+}
+
+function removeRecord(id) {
+    return deleteRecord(id);
+}
+
 module.exports = {
     getAllRecordDtos,
-    createRecord
+    getRecordDtoById,
+    createRecord,
+    editRecord,
+    removeRecord
 };

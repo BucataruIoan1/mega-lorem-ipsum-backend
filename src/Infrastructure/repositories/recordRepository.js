@@ -1,10 +1,10 @@
 const fs = require("fs");
 const path = require("path");
-const Record = require("../../../Domain/entities/Record");
+const Record = require("../../Domain/entities/Record");
 
 const filePath = path.join(
     __dirname,
-    "../../../Data/records.json"
+    "../../Data/records.json"
 );
 
 function getAllRecords() {
@@ -54,8 +54,50 @@ function addRecord(recordData) {
     return record;
 }
 
+function updateRecord(id, recordData) {
+    const records = getAllRecords();
+
+    const record = records.find(record => record.id === id);
+
+    if (!record) {
+        return null;
+    }
+
+    record.content = recordData.content;
+    record.categoryId = recordData.categoryId;
+    record.statusId = recordData.statusId;
+    record.ownerId = recordData.ownerId;
+    record.priorityId = recordData.priorityId;
+    record.lastModified = new Date().toLocaleTimeString(
+        "en-GB",
+        { hour12: false }
+    );
+
+    saveRecords(records);
+
+    return record;
+}
+
+function deleteRecord(id) {
+    const records = getAllRecords();
+
+    const index = records.findIndex(record => record.id === id);
+
+    if (index === -1) {
+        return false;
+    }
+
+    records.splice(index, 1);
+
+    saveRecords(records);
+
+    return true;
+}
+
 module.exports = {
     getAllRecords,
     getRecordById,
-    addRecord
+    addRecord,
+    updateRecord,
+    deleteRecord
 };

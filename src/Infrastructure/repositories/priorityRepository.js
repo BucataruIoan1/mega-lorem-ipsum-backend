@@ -4,7 +4,7 @@ const Priority = require("../../Domain/entities/Priority");
 
 const filePath = path.join(
     __dirname,
-    "../../../Data/priorities.json"
+    "../../Data/priorities.json"
 );
 
 function getAllPriorities() {
@@ -13,12 +13,10 @@ function getAllPriorities() {
     return JSON.parse(data);
 }
 
-function savePriorities(priorities) {
-    fs.writeFileSync(
-        filePath,
-        JSON.stringify(priorities, null, 2),
-        "utf8"
-    );
+function getPriorityById(id) {
+    const priorities = getAllPriorities();
+
+    return priorities.find(priority => priority.id === id) || null;
 }
 
 function getNextId(priorities) {
@@ -27,6 +25,14 @@ function getNextId(priorities) {
     }
 
     return Math.max(...priorities.map(priority => priority.id)) + 1;
+}
+
+function savePriorities(priorities) {
+    fs.writeFileSync(
+        filePath,
+        JSON.stringify(priorities, null, 2),
+        "utf8"
+    );
 }
 
 function addPriority(priorityData) {
@@ -44,14 +50,42 @@ function addPriority(priorityData) {
     return priority;
 }
 
-function findPriorityById(id) {
+function updatePriority(id, priorityData) {
     const priorities = getAllPriorities();
 
-    return priorities.find(priority => priority.id === id) || null;
+    const priority = priorities.find(priority => priority.id === id);
+
+    if (!priority) {
+        return null;
+    }
+
+    priority.name = priorityData.name;
+
+    savePriorities(priorities);
+
+    return priority;
+}
+
+function deletePriority(id) {
+    const priorities = getAllPriorities();
+
+    const index = priorities.findIndex(priority => priority.id === id);
+
+    if (index === -1) {
+        return false;
+    }
+
+    priorities.splice(index, 1);
+
+    savePriorities(priorities);
+
+    return true;
 }
 
 module.exports = {
     getAllPriorities,
+    getPriorityById,
     addPriority,
-    findPriorityById
+    updatePriority,
+    deletePriority
 };
