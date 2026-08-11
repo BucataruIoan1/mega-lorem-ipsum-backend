@@ -2,5 +2,17 @@
   {
     "id": 1,
     "name": "Technology"
+  },
+  {
+    "id": 2,
+    "name": "Software"
+  },
+  {
+    "id": 3,
+    "name": "Medicine"
+  },
+  {
+    "id": 4,
+    "name": "Learning"
   }
 ]

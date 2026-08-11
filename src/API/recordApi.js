@@ -5,15 +5,98 @@ const {
     getRecordDtoById,
     createRecord,
     editRecord,
-    removeRecord
+    removeRecord,
+    generateLoremRecords
 } = require("../Application/services/recordService");
 
 const router = express.Router();
 
 router.get("/", (req, res) => {
-    const records = getAllRecordDtos();
+    const {
+        page = "1",
+        pageSize = "20",
+        search = "",
+        categoryId,
+        statusId,
+        ownerId,
+        priorityId,
+        sortBy,
+        sortDir = "asc"
+    } = req.query;
 
-    return res.status(200).json(records);
+    const allowedPageSizes = [10, 20, 50];
+    const allowedSortBy = [
+        "id",
+        "content",
+        "category",
+        "status",
+        "owner",
+        "priority",
+        "lastModified"
+    ];
+    const allowedSortDir = ["asc", "desc"];
+
+    const parsedPage = Number(page);
+
+    if (!Number.isInteger(parsedPage) || parsedPage < 1) {
+        return res.status(400).json({
+            message: "Page must be a positive integer."
+        });
+    }
+
+    let parsedPageSize;
+
+    if (pageSize === "all") {
+        parsedPageSize = "all";
+    } else {
+        parsedPageSize = Number(pageSize);
+
+        if (!allowedPageSizes.includes(parsedPageSize)) {
+            return res.status(400).json({
+                message: "Page size must be 10, 20, 50 or all."
+            });
+        }
+    }
+
+    let parsedSortBy = null;
+
+    if (sortBy != null && sortBy !== "") {
+        if (!allowedSortBy.includes(sortBy)) {
+            return res.status(400).json({
+                message: `sortBy must be one of: ${allowedSortBy.join(", ")}.`
+            });
+        }
+
+        parsedSortBy = sortBy;
+    }
+
+    let parsedSortDir = "asc";
+
+    if (sortDir != null && sortDir !== "") {
+        const normalizedDir = String(sortDir).toLowerCase();
+
+        if (!allowedSortDir.includes(normalizedDir)) {
+            return res.status(400).json({
+                message: "sortDir must be 'asc' or 'desc'."
+            });
+        }
+
+        parsedSortDir = normalizedDir;
+    }
+
+    const result = getAllRecordDtos({
+        page: parsedPage,
+        pageSize: parsedPageSize,
+        search,
+        categoryId: categoryId ? Number(categoryId) : null,
+        statusId: statusId ? Number(statusId) : null,
+        ownerId: ownerId ? Number(ownerId) : null,
+        priorityId: priorityId ? Number(priorityId) : null,
+        sortBy: parsedSortBy,
+        sortDir: parsedSortDir
+    });
+
+    return res.status(200).json(result);
 });
 
 router.get("/:id", (req, res) => {
@@ -26,6 +109,28 @@ router.get("/:id", (req, res) => {
     }
 
     return res.status(200).json(record);
+});
+
+router.post("/generate-lorem", (req, res) => {
+    const { count } = req.body;
+
+    const allowedCounts = [10, 20, 50, 100, 200];
+
+    const parsedCount = Number(count);
+
+    if (!allowedCounts.includes(parsedCount)) {
+        return res.status(400).json({
+            message: "Count must be one of: 10, 20, 50, 100, 200."
+        });
+    }
+
+    const records = generateLoremRecords(parsedCount);
+
+    return res.status(201).json({
+        message: `Successfully generated ${records.length} records.`,
+        generatedCount: records.length,
+        records
+    });
 });
 
 router.post("/", (req, res) => {

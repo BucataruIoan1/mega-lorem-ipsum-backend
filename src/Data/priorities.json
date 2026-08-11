@@ -2,5 +2,13 @@
   {
     "id": 1,
     "name": "High"
+  },
+  {
+    "id": 2,
+    "name": "Normal"
+  },
+  {
+    "id": 3,
+    "name": "Low"
   }
 ]

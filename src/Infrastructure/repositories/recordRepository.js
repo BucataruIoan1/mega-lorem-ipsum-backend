@@ -63,17 +63,26 @@ function updateRecord(id, recordData) {
         return null;
     }
 
-    record.content = recordData.content;
-    record.categoryId = recordData.categoryId;
-    record.statusId = recordData.statusId;
-    record.ownerId = recordData.ownerId;
-    record.priorityId = recordData.priorityId;
-    record.lastModified = new Date().toLocaleTimeString(
-        "en-GB",
-        { hour12: false }
-    );
+    const hasChanges =
+        record.content !== recordData.content ||
+        record.categoryId !== recordData.categoryId ||
+        record.statusId !== recordData.statusId ||
+        record.ownerId !== recordData.ownerId ||
+        record.priorityId !== recordData.priorityId;
 
-    saveRecords(records);
+    if (hasChanges) {
+        record.content = recordData.content;
+        record.categoryId = recordData.categoryId;
+        record.statusId = recordData.statusId;
+        record.ownerId = recordData.ownerId;
+        record.priorityId = recordData.priorityId;
+        record.lastModified = new Date().toLocaleTimeString(
+            "en-GB",
+            { hour12: false }
+        );
+
+        saveRecords(records);
+    }
 
     return record;
 }
@@ -94,10 +103,36 @@ function deleteRecord(id) {
     return true;
 }
 
+function addRecordsBulk(recordsData) {
+    const records = getAllRecords();
+
+    let currentId = getNextId(records);
+
+    const newRecords = recordsData.map(recordData => {
+        const record = new Record({
+            id: currentId++,
+            content: recordData.content,
+            categoryId: recordData.categoryId,
+            statusId: recordData.statusId,
+            ownerId: recordData.ownerId,
+            priorityId: recordData.priorityId
+        });
+
+        return record;
+    });
+
+    records.push(...newRecords);
+
+    saveRecords(records);
+
+    return newRecords;
+}
+
 module.exports = {
     getAllRecords,
     getRecordById,
     addRecord,
     updateRecord,
-    deleteRecord
+    deleteRecord,
+    addRecordsBulk
 };

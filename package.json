@@ -5,7 +5,17 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "test": "jest --verbose"
+  },
+  "nodemonConfig": {
+    "watch": ["src"],
+    "ignore": [
+      "src/Data/*",
+      "src/__tests__/*",
+      "coverage/*"
+    ],
+    "ext": "js"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +24,7 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
+    "jest": "^29.7.0",
     "nodemon": "^3.1.14"
   }
 }

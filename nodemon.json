@@ -1,0 +1,9 @@
+{
+  "watch": ["src"],
+  "ignore": [
+    "src/Data/*",
+    "src/__tests__/*",
+    "coverage/*"
+  ],
+  "ext": "js"
+}
